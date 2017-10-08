@@ -1,6 +1,8 @@
 
 { 
-    "profit_loss" = [
+
+
+    "profit_loss" : [
 
         { 
             "type": "passive",
@@ -9,7 +11,8 @@
             "description": "Jozko's car.",
             "date_operation": {
                 "date_acquire": "2015",
-                "date_realize": "2017"
+                "date_realize": "2017",
+            "global_event" : false
             },
 
             "value" : {
