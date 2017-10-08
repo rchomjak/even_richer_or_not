@@ -20,17 +20,14 @@ class DataInputHandle(object):
 
     def __init__(self, input_file_name):
 
-        if not isinstance(input_file_name, str):
-            raise TypeError("input_file_name must be string")
-
         self.input_file_name = input_file_name
 
     def __open_file(self, input_file_name):
-        ''' Open file where data are stored '''
+        """ Open file where data are stored. """
         raise NotImplementedError
             
     def __read_file(self):
-        ''' Read file where data are stored.'''
+        """ Read file where data are stored."""
         raise NotImplementedError 
 
     def check_schema(self):
@@ -40,8 +37,8 @@ class JsonDataInputHadle(DataInputHandle):
 
     SCHEMA="asdf"
 
-    def __init__(self, input_file_name="", loaded_objects = None):
-        DataInputHandle.__init__(input_file_name)
+    def __init__(self, input_file_name="", loaded_objects = []):
+        DataInputHandle.__init__(self, input_file_name)
  
         self.is_extern_load_object = False 
         self.loaded_objects = loaded_objects       
@@ -49,35 +46,29 @@ class JsonDataInputHadle(DataInputHandle):
         if not len(self.input_file_name) and self.loaded_objects is None:
             raise TypeError("Invalid parameters.")
 
-        if isinstance(loaded_objects, None):
+        if isinstance(loaded_objects, dict) and len(loaded_objects):
             self.is_extern_load_object = True
 
         self.__economy_objects = []
 
     @coroutine
     def __check_schema(self, target, check_schema=False):
-        """ Check input data trough Json schema"""
+        """ Check input data trough JSON schema"""
         input_data = ""
         while True:
-            try:
                 input_data = (yield)
                 if check_schema:
                     jsonschema.Draft4Validator(JsonDataInputHadle.SCHEMA) 
                 else:
                     target.send(input_data)
 
-            except GeneratorExit:
-                target.close()
-
-
     @coroutine
     def __read_file(self, target):
-        try:
+        #try:
             while True:
                 fp = (yield)
-                target.send(json.loads(fp))
-        except GeneratorExit:
-            target.close()
+                target.send(json.loads(fp.read()))
+            
 
     def __open_file(self, target):
         try:
@@ -93,19 +84,20 @@ class JsonDataInputHadle(DataInputHandle):
         """ makes pipe from file: open_file | read_file | load_object > self.loaded_object """
         #create pipeline which fill self.loaded_objects
         if not self.is_extern_load_object:
-            self.__open_file(self.__read_file(self.__check_schema(self.__load_objects))) 
+            self.__open_file(self.__read_file(self.__check_schema(self.__load_objects()))) 
 
+        #print(self.loaded_objects)
         for in_var in self.loaded_objects:
             tmp_econ = economy.Economy()
             tmp_econ.__dict__ = in_var
-            self.__economy_objects.insert(tmp_econ)
+            self.__economy_objects.append(tmp_econ)
 
-
+    @coroutine
     def __load_objects(self):
         try:
             while True:
                 data = (yield)
-                self.loaded_objects.insert(data.get('profit_loss', None))
+                self.loaded_objects.append(data.get('profit_loss', [None])[0])
 
         except GeneratorExit:
             pass
@@ -118,15 +110,15 @@ class JsonDataInputHadle(DataInputHandle):
 
         cls.SCHEMA=schema
 
-    @economy_objects.setter
-    def economy_objects(self):
-        return self.__economy_objects
-   
-    @economy_objects.getter
+    @property
     def economy_objects(self, value):
         raise AttributeError("You cannot change this value")
 
-    @extern_status.getter 
+    @economy_objects.getter 
+    def economy_objects(self):
+        return self.__economy_objects
+   
+    @property
     def extern_status(self):
         return self.is_extern_load_object
 
@@ -136,7 +128,7 @@ class JsonDataInputHadle(DataInputHandle):
             raise TypeError("Invalid parameters")
         self.is_extern_loaded_object = status
 
-    @raw_objects.getter
+    @property
     def raw_objects(self):
         return self.loaded_objects
 
@@ -146,3 +138,10 @@ class JsonDataInputHadle(DataInputHandle):
         self.is_extern_load_object = True
 
 
+
+a = JsonDataInputHadle('input.json')
+
+
+a.make_objects()
+objects = a.economy_objects 
+print(objects[0].__dict__)
