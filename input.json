@@ -1,6 +1,8 @@
 
 { 
-    "profit_loss" = [
+
+
+    "profit_loss" : [
 
         { 
             "type": "passive",
@@ -9,7 +11,8 @@
             "description": "Jozko's car.",
             "date_operation": {
                 "date_acquire": "2015",
-                "date_realize": "2017"
+                "date_realize": "2017",
+                "global_event" : false
             },
 
             "value" : {
@@ -22,7 +25,7 @@
                 }
             },
 
-            "value":{
+            "sum_loss_profits":{
 
                 "costs": {
                     "special": {
@@ -39,44 +42,38 @@
                             ]}
                     }, 
 
-                    "regular": {
-                        [{"name": "fuel",
-                            "value": "300",
-                            "description":"cost of fuel",
-                            "start_date": "2015",
-                            "end_date": "-",
-                            "period":"1m"
-                        }]
+                    "regular": 
+                    [{"name": "fuel",
+                        "value": "300",
+                        "description":"cost of fuel",
+                        "start_date": "2015",
+                        "end_date": "-",
+                        "period":"1m"
+                    }]
 
-                    }
+
                 },
 
                 "return":
                 {
                     "special": {
-                        "date": {[]
-                        }
+                        "date": {"asdf":["sad"]}
 
 
                     }, 
 
-                    "regular": {
-                        [{ }]
+                    "regular": 
+                    [{ }]
 
-                    }
 
                 }
             }
 
-
-
-    ]
-
         }
-
-
     ]
-
-
-
 }
+
+
+
+
+
