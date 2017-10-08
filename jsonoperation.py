@@ -7,14 +7,14 @@ try:
 
 #project files
     import economy
-
+    from decorators import coroutine
 
 except ImportError as e:
     print(e, file=sys.stderr)
     exit()
 
 class DataInputHandle(object):
-    ''' Take data ,json format, from file and make object from it '''
+    """ Take data ,json format, from file and make object from it """
 
     SCHEMA = ""
 
@@ -54,17 +54,9 @@ class JsonDataInputHadle(DataInputHandle):
 
         self.__economy_objects = []
 
-    def __coroutine(self, func):
-        ''' decorator functions for coroutines - initialization '''
-        def ret_func(*args, **kwargs):
-            __func = func(*args, **kwargs)
-            next(__func)
-            return __func
-        return ret_func
-
-    @__coroutine
+    @coroutine
     def __check_schema(self, target, check_schema=False):
-        ''' Check input data trough Json schema''' 
+        """ Check input data trough Json schema"""
         input_data = ""
         while True:
             try:
@@ -74,15 +66,11 @@ class JsonDataInputHadle(DataInputHandle):
                 else:
                     target.send(input_data)
 
-            except jsonschema.ValidationError as e:
-                print(e, file=sys.stderr)
-                exit()
-
             except GeneratorExit:
                 target.close()
 
 
-    @__coroutine
+    @coroutine
     def __read_file(self, target):
         try:
             while True:
@@ -102,7 +90,7 @@ class JsonDataInputHadle(DataInputHandle):
              exit()
     
     def make_objects(self):
-        ''' makes pipe from file: open_file | read_file | load_object > self.loaded_object '''
+        """ makes pipe from file: open_file | read_file | load_object > self.loaded_object """
         #create pipeline which fill self.loaded_objects
         if not self.is_extern_load_object:
             self.__open_file(self.__read_file(self.__check_schema(self.__load_objects))) 
