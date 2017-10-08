@@ -1,20 +1,16 @@
 #!/usr/bin/env python3.6
 
-try:
-    import json
-    import jsonschema
-    import sys
 
-#project files
-    import economy
-    from decorators import coroutine
+import json
+import jsonschema
+import sys
 
-except ImportError as e:
-    print(e, file=sys.stderr)
-    exit()
+import economy
+from decorators import coroutine
+
 
 class DataInputHandle(object):
-    """ Take data ,json format, from file and make object from it """
+    """ Take data from file and make object from it """
 
     SCHEMA = ""
 
@@ -30,7 +26,7 @@ class DataInputHandle(object):
         """ Read file where data are stored."""
         raise NotImplementedError 
 
-    def check_schema(self):
+    def __check_schema(self):
         raise NotImplementedError
 
 class JsonDataInputHadle(DataInputHandle):
@@ -64,21 +60,16 @@ class JsonDataInputHadle(DataInputHandle):
 
     @coroutine
     def __read_file(self, target):
-        #try:
             while True:
                 fp = (yield)
                 target.send(json.loads(fp.read()))
             
 
     def __open_file(self, target):
-        try:
             with open(self.input_file_name, "r") as fp:
                      target.send(fp) 
             target.close()
 
-        except IOError as e:
-             print(e, file=sys.stderr)
-             exit()
     
     def make_objects(self):
         """ makes pipe from file: open_file | read_file | load_object > self.loaded_object """
@@ -86,7 +77,6 @@ class JsonDataInputHadle(DataInputHandle):
         if not self.is_extern_load_object:
             self.__open_file(self.__read_file(self.__check_schema(self.__load_objects()))) 
 
-        #print(self.loaded_objects)
         for in_var in self.loaded_objects:
             tmp_econ = economy.Economy()
             tmp_econ.__dict__ = in_var
@@ -94,13 +84,11 @@ class JsonDataInputHadle(DataInputHandle):
 
     @coroutine
     def __load_objects(self):
-        try:
             while True:
                 data = (yield)
-                self.loaded_objects.append(data.get('profit_loss', [None])[0])
+                for obj in data.get('profit_loss', []):
+                    self.loaded_objects.append(obj)
 
-        except GeneratorExit:
-            pass
 
     @classmethod  
     def change_schema(cls, schema):
@@ -126,7 +114,7 @@ class JsonDataInputHadle(DataInputHandle):
     def extern_status(self, status):
         if not isinstance(status, bool):
             raise TypeError("Invalid parameters")
-        self.is_extern_loaded_object = status
+        self.is_extern_load_object = status
 
     @property
     def raw_objects(self):
@@ -143,5 +131,5 @@ a = JsonDataInputHadle('input.json')
 
 
 a.make_objects()
-objects = a.economy_objects 
-print(objects[0].__dict__)
+a.extern_status = True
+print (a.extern_status)
