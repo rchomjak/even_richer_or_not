@@ -1,0 +1,82 @@
+
+{ 
+    "profit_loss" = [
+
+        { 
+            "type": "passive",
+            "category": "car",
+            "name_thing": "Honda Civic",
+            "description": "Jozko's car.",
+            "date_operation": {
+                "date_acquire": "2015",
+                "date_realize": "2017"
+            },
+
+            "value" : {
+                "aquire_value": "10000",
+                "realize_value": "80000",
+                "amortization_rate":{
+                    "period": ["2015-08", "2016-12"],
+                    "value": ["0.9", "0,8"]
+
+                }
+            },
+
+            "value":{
+
+                "costs": {
+                    "special": {
+                        "date": {
+                            "2016-07": [{"name": "exhaust",
+                                "value": "250",
+                                "description":"asdf"},
+                                {"name": "window",
+                                    "value": "500",
+                                    "description": "back right side window" 
+                                }
+
+
+                            ]}
+                    }, 
+
+                    "regular": {
+                        [{"name": "fuel",
+                            "value": "300",
+                            "description":"cost of fuel",
+                            "start_date": "2015",
+                            "end_date": "-",
+                            "period":"1m"
+                        }]
+
+                    }
+                },
+
+                "return":
+                {
+                    "special": {
+                        "date": {[]
+                        }
+
+
+                    }, 
+
+                    "regular": {
+                        [{ }]
+
+                    }
+
+                }
+            }
+
+
+
+    ]
+
+        }
+
+
+    ]
+
+
+
+}
