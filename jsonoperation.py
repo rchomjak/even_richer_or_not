@@ -126,10 +126,3 @@ class JsonDataInputHadle(DataInputHandle):
         self.is_extern_load_object = True
 
 
-
-a = JsonDataInputHadle('input.json')
-
-
-a.make_objects()
-a.extern_status = True
-print (a.extern_status)
