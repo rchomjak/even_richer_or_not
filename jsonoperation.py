@@ -14,9 +14,9 @@ class DataInputHandle(object):
 
     SCHEMA = ""
 
-    def __init__(self, input_file_name):
+    def __init__(self, input_file_names):
 
-        self.input_file_name = input_file_name
+        self.input_file_names = input_file_names
 
     def __open_file(self, input_file_name):
         """ Open file where data are stored. """
@@ -33,13 +33,13 @@ class JsonDataInputHadle(DataInputHandle):
 
     SCHEMA="asdf"
 
-    def __init__(self, input_file_name="", loaded_objects = []):
-        DataInputHandle.__init__(self, input_file_name)
+    def __init__(self, input_file_names=[], loaded_objects=[]):
+        DataInputHandle.__init__(self, input_file_names)
  
         self.is_extern_load_object = False 
         self.loaded_objects = loaded_objects       
 
-        if not len(self.input_file_name) and self.loaded_objects is None:
+        if not len(self.input_file_names) and not len(self.loaded_objects):
             raise TypeError("Invalid parameters.")
 
         if isinstance(loaded_objects, dict) and len(loaded_objects):
@@ -66,16 +66,19 @@ class JsonDataInputHadle(DataInputHandle):
             
 
     def __open_file(self, target):
-            with open(self.input_file_name, "r") as fp:
+
+        for file_input in self.input_file_names:
+            with open(file_input, "r") as fp:
                      target.send(fp) 
-            target.close()
+        target.close()
 
     
     def make_objects(self):
-        """ makes pipe from file: open_file | read_file | load_object > self.loaded_object """
-        #create pipeline which fill self.loaded_objects
+        """ makes pipes from file: open_file | read_file | load_object > self.loaded_object 
+            and makes new object from JSON -> economy objects
+        """
         if not self.is_extern_load_object:
-            self.__open_file(self.__read_file(self.__check_schema(self.__load_objects()))) 
+            self.__open_file(self.__read_file(self.__check_schema(self.__load_objects(), False))) 
 
         for in_var in self.loaded_objects:
             tmp_econ = economy.Economy()
