@@ -1,9 +1,13 @@
 #!/usr/bin/env python3.6
 
+import datetime
 
 import json
 import jsonschema
+import re
 import sys
+
+
 
 import economy
 from decorators import coroutine
@@ -58,11 +62,43 @@ class JsonDataInputHadle(DataInputHandle):
                 else:
                     target.send(input_data)
 
+    def __as_date(self, dct):
+
+        re_date_format = '(?P<date_match>(?P<format1>(?P<year_fm1>\d{4,4})[-| ]?(?P<month_fm1>\d{0,2})[-| ]?(?P<day_fm1>\d{0,2}))?(?P<format2>(?P<day_fm2>\d{0,2})[-| ]?(?P<month_fm2>\d{0,2})[-| ]?(?P<year_fm2>\d{4,4}))?)'
+        re_date_format_comp = re.compile(re_date_format)  
+
+        re_date_comp = re.compile('.*date.*') 
+        date_list = filter(re_date_comp.match, dct.keys())
+
+        strptime_format = '%Y %m %d'
+        for date_key in date_list:
+
+            date_entry = dct.get(date_key)
+            date_entry_match = re_date_format_comp.match(date_entry)
+
+            if len(date_entry_match.group('date_match')):
+                if len(date_entry_match.group('format1')):
+                    year_month_day = date_entry_match.group('year_fm1', 'month_fm1', 'day_fm1')
+                elif len(date_entry_match.group('format2')):
+                    year_month_day = date_entry_match.group('year_fm2', 'month_fm2', 'day_fm2')
+                
+                year_month_day = map(lambda x: 1 if not len(x) else x, year_month_day)
+
+                dct[date_key] = datetime.datetime.strptime("{0} {1} {2}".format(*year_month_day), strptime_format)
+
+                continue
+            elif date_entry == '-':
+                dct[date_key] = datetime.datetime.max
+
+                continue
+
+        return dct
+
     @coroutine
     def __read_file(self, target):
             while True:
                 fp = (yield)
-                target.send(json.loads(fp.read()))
+                target.send(json.loads(fp.read(), object_hook=self.__as_date))
             
 
     def __open_file(self, target):
@@ -77,8 +113,9 @@ class JsonDataInputHadle(DataInputHandle):
         """ makes pipes from file: open_file | read_file | load_object > self.loaded_object 
             and makes new object from JSON -> economy objects
         """
-        if not self.is_extern_load_object:
+        if not self.is_extern_load_object :
             self.__open_file(self.__read_file(self.__check_schema(self.__load_objects(), False))) 
+
 
         for in_var in self.loaded_objects:
             tmp_econ = economy.Economy()

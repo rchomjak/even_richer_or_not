@@ -3,6 +3,6 @@ import jsonoperation
 
 
     
-a = jsonoperation.JsonDataInputHadle(["input.json", "input.json"])
+a = jsonoperation.JsonDataInputHadle(["input.json"])
 a.make_objects()
-print (a.economy_objects)
+print (a.economy_objects[0].__dict__)

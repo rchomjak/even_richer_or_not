@@ -9,38 +9,42 @@
             "category": "car",
             "name_thing": "Honda Civic",
             "description": "Jozko's car.",
-            "date_operation": {
+            "operation": {
                 "date_acquire": "2015",
-                "date_realize": "2017",
-                "global_event" : false
+                "date_realize": "2017"
             },
+            "global_event" : false,
 
             "value" : {
                 "aquire_value": "10000",
                 "realize_value": "80000",
-                "amortization_rate":{
-                    "period": ["2015-08", "2016-12"],
-                    "value": ["0.9", "0,8"]
-
-                }
+                "amortization_rate":[{
+                    "date": "2015-08",
+                    "value": "0.9"
+                    },
+                    {"date": "2016-09",
+                     "value": "0.8" 
+                    }
+                
+                ]
             },
 
             "sum_loss_profits":{
 
                 "costs": {
-                    "special": {
-                        "date": {
-                            "2016-07": [{"name": "exhaust",
+                    "special": 
+                             [{"name": "exhaust",
                                 "value": "250",
-                                "description":"asdf"},
+                                "description":"asdf",
+                                "date": "2017-10-1"},
                                 {"name": "window",
                                     "value": "500",
-                                    "description": "back right side window" 
-                                }
+                                    "description": "back right side window", 
+                                    "date":"2017-10-1"}
 
 
-                            ]}
-                    }, 
+                            ],
+                    
 
                     "regular": 
                     [{"name": "fuel",
@@ -56,11 +60,12 @@
 
                 "return":
                 {
-                    "special": {
-                        "date": {"asdf":["sad"]}
+                    "special":[ {
+                        "date": "-",
+                        "value": "123"
+                        }
 
-
-                    }, 
+                    ], 
 
                     "regular": 
                     [{ }]
