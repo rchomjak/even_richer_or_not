@@ -46,7 +46,6 @@ class Economy(object):
             else:
 
                 total_sum = self.value.get('acquire_value')
-                print(in_date) 
                 amor_rate = list(pairs(self.value.get('amortization_rate', [])))
                 amor_rate_1 = amor_rate.pop(0)
                 amor_rate_2 = amor_rate.pop(0)

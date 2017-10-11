@@ -71,7 +71,7 @@ class JsonDataInputHadle(DataInputHandle):
                 if matchobj.group('year'):
                     return str(int(number) * 365)
                 elif matchobj.group('month'):
-                    return str(int(number) * 3)
+                    return str(int(number) * 30)
                 elif matchobj.group('day'):
                     return str(int (number) * 1)
 
