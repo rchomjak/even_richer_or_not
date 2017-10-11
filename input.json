@@ -1,7 +1,5 @@
 
 { 
-
-
     "profit_loss" : [
 
         { 
@@ -16,14 +14,16 @@
             "global_event" : false,
 
             "value" : {
-                "aquire_value": "10000",
-                "realize_value": "80000",
+                "acquire_value": 10000,
+                "realize_value": 80000,
                 "amortization_rate":[{
                     "date": "2015-08",
-                    "value": "0.9"
+                    "value": 0.9,
+                    "period": "1y"
                     },
                     {"date": "2016-09",
-                     "value": "0.8" 
+                     "value": 0.8,
+                     "period": "1y" 
                     }
                 
                 ]
@@ -42,9 +42,7 @@
                                     "description": "back right side window", 
                                     "date":"2017-10-1"}
 
-
                             ],
-                    
 
                     "regular": 
                     [{"name": "fuel",
@@ -58,7 +56,7 @@
 
                 },
 
-                "return":
+                "returns":
                 {
                     "special":[ {
                         "date": "-",

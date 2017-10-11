@@ -8,7 +8,6 @@ import re
 import sys
 
 
-
 import economy
 from decorators import coroutine
 
@@ -62,8 +61,27 @@ class JsonDataInputHadle(DataInputHandle):
                 else:
                     target.send(input_data)
 
-    def __as_date(self, dct):
+    def __json_hook(self, dct):
 
+        """ periodicty format """
+        if 'period' in dct:
+
+            def periodicity (matchobj):
+                number = matchobj.group('number')
+                if matchobj.group('year'):
+                    return str(int(number) * 365)
+                elif matchobj.group('month'):
+                    return str(int(number) * 3)
+                elif matchobj.group('day'):
+                    return str(int (number) * 1)
+
+
+            re_periodicy = '(?P<number>\d+)(?P<year>y|Y)?(?P<month>m|M)?(?P<day>d|D)?'
+            
+            dct['period'] = int(re.sub(re_periodicy, periodicity, dct['period']))
+
+
+        """ Date format  """
         re_date_format = '(?P<date_match>(?P<format1>(?P<year_fm1>\d{4,4})[-| ]?(?P<month_fm1>\d{0,2})[-| ]?(?P<day_fm1>\d{0,2}))?(?P<format2>(?P<day_fm2>\d{0,2})[-| ]?(?P<month_fm2>\d{0,2})[-| ]?(?P<year_fm2>\d{4,4}))?)'
         re_date_format_comp = re.compile(re_date_format)  
 
@@ -98,11 +116,10 @@ class JsonDataInputHadle(DataInputHandle):
     def __read_file(self, target):
             while True:
                 fp = (yield)
-                target.send(json.loads(fp.read(), object_hook=self.__as_date))
+                target.send(json.loads(fp.read(), object_hook=self.__json_hook))
             
 
     def __open_file(self, target):
-
         for file_input in self.input_file_names:
             with open(file_input, "r") as fp:
                      target.send(fp) 
