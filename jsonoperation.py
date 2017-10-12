@@ -60,6 +60,7 @@ class JsonDataInputHadle(DataInputHandle):
                     jsonschema.Draft4Validator(JsonDataInputHadle.SCHEMA) 
                 else:
                     target.send(input_data)
+        target.close()
 
     def __json_hook(self, dct):
 
@@ -117,7 +118,7 @@ class JsonDataInputHadle(DataInputHandle):
             while True:
                 fp = (yield)
                 target.send(json.loads(fp.read(), object_hook=self.__json_hook))
-            
+            target.close() 
 
     def __open_file(self, target):
         for file_input in self.input_file_names:
