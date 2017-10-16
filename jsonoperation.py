@@ -115,10 +115,10 @@ class JsonDataInputHadle(DataInputHandle):
 
     @coroutine
     def __read_file(self, target):
-            while True:
-                fp = (yield)
-                target.send(json.loads(fp.read(), object_hook=self.__json_hook))
-            target.close() 
+        while True:
+            fp = (yield)
+            target.send(json.loads(fp.read(), object_hook=self.__json_hook))
+        target.close() 
 
     def __open_file(self, target):
         for file_input in self.input_file_names:
@@ -153,8 +153,15 @@ class JsonDataInputHadle(DataInputHandle):
         
         if not isinstance(schema, str):
             raise TypeError("schema MUST be string.")
-
         cls.SCHEMA=schema
+
+    @property
+    def collection_economy_objects(self, value):
+         raise AttributeError("You cannot change this value")
+
+    @collection_economy_objects.getter
+    def collection_economy_objects(self):
+        return economy.CollectionEconomy(self.__economy_objects)
 
     @property
     def economy_objects(self, value):
