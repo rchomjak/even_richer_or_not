@@ -1,7 +1,4 @@
-
 { 
-
-
     "profit_loss" : [
 
         { 
@@ -9,61 +6,151 @@
             "category": "car",
             "name_thing": "Honda Civic",
             "description": "Jozko's car.",
-            "date_operation": {
+            "operation": {
                 "date_acquire": "2015",
-                "date_realize": "2017",
-                "global_event" : false
+                "date_realize": "2017"
             },
 
             "value" : {
-                "aquire_value": "10000",
-                "realize_value": "80000",
-                "amortization_rate":{
-                    "period": ["2015-08", "2016-12"],
-                    "value": ["0.9", "0,8"]
-
-                }
+                "acquire_value": 150000,
+                "realize_value": 80000,
+                "amortization_rate":[{
+                    "date": "2015-08",
+                    "value": 0.9,
+                    "period": "1y"
+                    },
+                    {"date": "2016-09",
+                     "value": 0.8,
+                     "period": "1y" 
+                    }
+                
+                ]
             },
 
             "sum_loss_profits":{
 
                 "costs": {
-                    "special": {
-                        "date": {
-                            "2016-07": [{"name": "exhaust",
-                                "value": "250",
-                                "description":"asdf"},
+                    "special": 
+                             [{"name": "exhaust",
+                                "value": 250,
+                                "description":"asdf",
+                                "date": "2017-10-1"},
                                 {"name": "window",
-                                    "value": "500",
-                                    "description": "back right side window" 
-                                }
+                                    "value": 500,
+                                    "description": "back right side window", 
+                                    "date":"2017-10-1"}
 
-
-                            ]}
-                    }, 
+                            ],
 
                     "regular": 
                     [{"name": "fuel",
-                        "value": "300",
+                        "value": 230,
                         "description":"cost of fuel",
                         "start_date": "2015",
+                        "end_date": "2016",
+                        "period":"1m"
+                    },
+                    
+                    {   "name": "fuel",
+                        "value": 1100,
+                        "description":"cost of fuel",
+                        "start_date": "2016",
                         "end_date": "-",
                         "period":"1m"
-                    }]
+                    }
+                    
+                    ]
 
 
                 },
 
-                "return":
+                "returns":
                 {
-                    "special": {
-                        "date": {"asdf":["sad"]}
+                    "special":[ {
+                        }
 
-
-                    }, 
+                    ], 
 
                     "regular": 
-                    [{ }]
+                    [{                      }]
+                    
+
+
+                }
+            }
+
+        },
+        { 
+            "type": "passive",
+            "category": "car",
+            "name_thing": "RR",
+            "description": "Limusine.",
+            "operation": {
+                "date_acquire": "2015"
+            },
+
+            "value" : {
+                "acquire_value": 10000,
+                "amortization_rate":[{
+                    "date": "2015-08",
+                    "value": 0.8,
+                    "period": "1y"
+                    },
+                    {"date": "2016-09",
+                     "value": 0.7,
+                     "period": "1y" 
+                    }
+                
+                ]
+            },
+
+            "sum_loss_profits":{
+
+                "costs": {
+                    "special": 
+                             [{"name": "exhaust",
+                                "value": 10200,
+                                "description":"asdf",
+                                "date": "2017-10-1"},
+                                {"name": "window",
+                                    "value": 15000,
+                                    "description": "back right side window", 
+                                    "date":"2017-11-5"}
+
+                            ],
+
+                    "regular": 
+                    [{"name": "fuel",
+                        "value": 2500,
+                        "description":"cost of fuel",
+                        "start_date": "2015",
+                        "end_date": "-",
+                        "period":"1m"
+                    },
+                    
+                    {   "name": "fuel",
+                        "value": 5000,
+                        "description":"cost of fuel",
+                        "start_date": "2016",
+                        "end_date": "-",
+                        "period":"1m"
+                    }
+                    
+                    ]
+
+
+                },
+
+                "returns":
+                {
+                    "special":[ {
+                        }
+
+                    ], 
+
+                    "regular": 
+                    [{                      }]
+                    
 
 
                 }
