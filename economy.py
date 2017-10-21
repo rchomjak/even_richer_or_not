@@ -91,6 +91,8 @@ class Economy(object):
             element_sum = 0
             if len(costs_special):
                 for element in costs_special:
+                    if len(element) == 0:
+                        continue
                     if in_start_date <= element.get('date') and element.get('date') < in_end_date:
                         element_sum = element.get('value', 0)
                         total_sum = total_sum + element_sum
@@ -106,6 +108,8 @@ class Economy(object):
 
             if len(costs_regular):
                 for element in costs_regular:
+                    if len(element) == 0:
+                        continue
                     value_per_day = element.get('value',0)/ float(element.get('period'))
 
                     if element.get('start_date') < in_start_date <= element.get('end_date'):
@@ -126,16 +130,15 @@ class Economy(object):
     def __count_sum_loss_profits_return(self, in_start_date, in_end_date, mode=ALL):
         
         def special(in_start_datei, in_end_date):
-            returns_special = self.sum_loss_profits.get('returns').get('special',[])
+            returns_special = self.sum_loss_profits.get('returns').get('special')
             total_sum = 0
             element_sum = 0
             includes_objects = []
 
             if len(returns_special):
                 for element in returns_special:
-
-                    if in_start_date < element.get('date'):
-                        break
+                    if len(element) == 0:
+                        continue
 
                     if  in_start_date <= element.get('date') and element.get('date') < in_end_date:
                         element_sum = element.get('value', 0)
@@ -152,6 +155,8 @@ class Economy(object):
 
             if len(costs_regular):
                 for element in costs_regular:
+                    if len(element) == 0:
+                        continue
 
                     value_per_day = element.get('value', 0)/ float(element.get('period'))
 

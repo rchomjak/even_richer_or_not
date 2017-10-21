@@ -31,22 +31,40 @@ def check_date(input_string):
         raise argparse.ArgumentTypeError("Input string: {0} is not valid date format".format(input_string))
     return dateutil.parser.parse(input_string)
     
+examples_string = """  
+    Examples:
+
+    #Shows graph from 2 files (input.json, input2.json) and save it to passive.html between dates with daily granularity
+    #also data are filtered by type and category
+
+    ./main.py --input-file input.json --input-file input2.json  --output-file actives.html --start-date 2010 --end-date 2020 --granularity \"DAILY\" --filter-type "active" --filter-category \"flat\"
+
+    
+    #Shows data without filter from input.json
+.   /main.py --input-file input.json  --output-file whole.html --start-date 2010 --end-date 2020 --granularity "YEARLY"
 
 
-parser = argparse.ArgumentParser(description="Program counts and plots some economical data to HTML file as SVG files.")
-parser.add_argument('--input-file', action='append', help="Data file in JSON format", required=True)
+    #The filters are depends on data in files.
+
+
+NOTES:
+    There is not any JSON schema, the program neihter check syntactically nor semantically data correctness.
+
+\n
+
+"""
+
+
+parser = argparse.ArgumentParser(description="Program counts and plots some economical data to HTML file as SVG files.", formatter_class=argparse.RawDescriptionHelpFormatter,epilog=(examples_string))
+parser.add_argument('--input-file', action='append', help="Data file in JSON format", required=True )
 parser.add_argument('--output-file', action='store', help="Name of output in HTML format", required=True)
 parser.add_argument('--start-date', type=check_date, help="Start date of range in format YYYY MM DD", required=True)
 parser.add_argument('--end-date', type=check_date, help="End date of range in format YYYY MM DD", required=True)
 parser.add_argument('--filter-type', action='store', help="Data are filtered based on type in JSON data file. Case sensitive. Default: None", default=None)
 parser.add_argument('--filter-category', action='store', help="Data are filtered based on category in JSON data file. Case sensitive. Default: None", default=None)
-parser.add_argument('--granularity', action='store', type=str, help="Sets granularity for generating a date range - size of step. Default: YEARLY", choices=['DAILY, MONTHLY, YEARLY'], default='YEARLY')
+parser.add_argument('--granularity', action='store', type=str, help="Sets granularity for generating a date range - size of step. Default: YEARLY", choices=['DAILY', 'MONTHLY', 'YEARLY'], default='YEARLY')
 
-#pridat example
-
-
-
-DateDataCollection = collections.namedtuple('DateDataCollecion', ['start_date', 'end_date', 'granularity', 'collection'])
+print(examples_string)
 
 AmortizationCollection = collections.namedtuple('Amortization', ['total_cost', 'date_value'])
 
@@ -70,12 +88,12 @@ def make_data(parsed_data):
     e_collection = data.collection_economy_objects
     filtered_e_collection = e_collection.get_collection(ele_type, ele_category)
 
-    return DateDataCollection(start_date, end_date, granularity, filtered_e_collection)
+    return (start_date, end_date, granularity, filtered_e_collection, (ele_type,ele_category))
 
 
 def graph(date_data_collection):
     
-    start_date, end_date, granularity, filtered_e_collection = date_data_collection
+    start_date, end_date, granularity, filtered_e_collection, ele_type_cat = date_data_collection
 
     img_data = io.BytesIO()
 
@@ -85,7 +103,7 @@ def graph(date_data_collection):
     costs_special, costs_regular = (filtered_e_collection.costs(start_date, end_date, granulation=granularity))
     costs = ReturnsCostsCollection(costs_special, costs_regular)
 
-    returns_special, returns_costs = filtered_e_collection.costs(start_date, end_date, granulation=granularity)
+    returns_special, returns_costs = filtered_e_collection.returns(start_date, end_date, granulation=granularity)
     returns = ReturnsCostsCollection(returns_special, returns_costs)
     
     x_amortization = list(amortization.date_value.keys())
@@ -110,9 +128,8 @@ def graph(date_data_collection):
     plt.plot(x_returns_special, y_returns_special, label="returns special")
     plt.plot(x_returns_regular, y_returns_regular, label="returns regular")
 
-    plt.title("asdf")
+    plt.title("Type: {0} Category: {1}".format(ele_type_cat[0], ele_type_cat[1]))
     plt.legend()
-    #plt.show()
     plt.savefig(img_data, orientation='landscape', transparent=True, format='svg')
     img_data.seek(0)
 
