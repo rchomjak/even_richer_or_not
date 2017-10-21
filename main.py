@@ -64,7 +64,6 @@ parser.add_argument('--filter-type', action='store', help="Data are filtered bas
 parser.add_argument('--filter-category', action='store', help="Data are filtered based on category in JSON data file. Case sensitive. Default: None", default=None)
 parser.add_argument('--granularity', action='store', type=str, help="Sets granularity for generating a date range - size of step. Default: YEARLY", choices=['DAILY', 'MONTHLY', 'YEARLY'], default='YEARLY')
 
-print(examples_string)
 
 AmortizationCollection = collections.namedtuple('Amortization', ['total_cost', 'date_value'])
 
