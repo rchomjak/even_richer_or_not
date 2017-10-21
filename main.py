@@ -41,7 +41,7 @@ examples_string = """
 
     
     #Shows data without filter from input.json
-.   /main.py --input-file input.json  --output-file whole.html --start-date 2010 --end-date 2020 --granularity "YEARLY"
+    ./main.py --input-file input.json  --output-file whole.html --start-date 2010 --end-date 2020 --granularity "YEARLY"
 
 
     #The filters are depends on data in files.
