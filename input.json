@@ -10,10 +10,9 @@
                 "date_acquire": "2015",
                 "date_realize": "2017"
             },
-            "global_event" : false,
 
             "value" : {
-                "acquire_value": 10000,
+                "acquire_value": 150000,
                 "realize_value": 80000,
                 "amortization_rate":[{
                     "date": "2015-08",
@@ -32,11 +31,11 @@
 
                 "costs": {
                     "special": 
-                             [{"name": "exhaust",
+                             [{"name": "PRVYexhaust",
                                 "value": 250,
                                 "description":"asdf",
                                 "date": "2017-10-1"},
-                                {"name": "window",
+                                {"name": "PRVYwindow",
                                     "value": 500,
                                     "description": "back right side window", 
                                     "date":"2017-10-1"}
@@ -44,7 +43,7 @@
                             ],
 
                     "regular": 
-                    [{"name": "fuel",
+                    [{"name": "PRVY",
                         "value": 10,
                         "description":"cost of fuel",
                         "start_date": "2015",
@@ -52,7 +51,7 @@
                         "period":"1m"
                     },
                     
-                    {   "name": "fuel",
+                    {   "name": "PRVY",
                         "value": 11,
                         "description":"cost of fuel",
                         "start_date": "2016",
@@ -98,7 +97,6 @@
                 "date_acquire": "2015",
                 "date_realize": "2017"
             },
-            "global_event" : false,
 
             "value" : {
                 "acquire_value": 10000,
@@ -120,11 +118,11 @@
 
                 "costs": {
                     "special": 
-                             [{"name": "exhaust",
+                             [{"name": "DRUHYexhaust",
                                 "value": 2,
                                 "description":"asdf",
                                 "date": "2017-10-1"},
-                                {"name": "window",
+                                {"name": "DRUHYwindow",
                                     "value": 2,
                                     "description": "back right side window", 
                                     "date":"2017-11-5"}

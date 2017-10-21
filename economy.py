@@ -9,7 +9,7 @@ import sys
 from decorators import coroutine
 
 
-REGULAR, SPECIAL, ALL = range(0, 3)
+REGULAR, SPECIAL, ALL  = range(0, 3)
 
 
 class Economy(object):
@@ -46,7 +46,6 @@ class Economy(object):
         if len(self.value) and len(self.value.get('amortization_rate', [])):
 
             if in_date < self.operation.get('date_acquire'):
-                print("input is before than date of acquire", file=sys.stderr)
                 total_sum = 0
             elif in_date == self.operation.get('date_acquire'):
                 total_sum = self.value.get('acquire_value')
@@ -116,9 +115,7 @@ class Economy(object):
 
             return (total_sum, includes_objects)
 
-        if mode == ALL:
-            return (special(in_start_date, in_end_date), regular(in_start_date, in_end_date))
-        elif mode == REGULAR:
+        if mode == REGULAR:
             return (None, regular(in_start_date, in_end_date))
         elif mode == SPECIAL:
             return (special(in_start_date, in_end_date), None)
@@ -126,9 +123,9 @@ class Economy(object):
     def get_costs(self, in_start_date, in_end_date, mode=ALL):
             return self.__count_sum_loss_profits_costs(in_start_date, in_end_date, mode)
 
-    def __count_sum_loss_profits_return(self, in_date, mode=ALL):
+    def __count_sum_loss_profits_return(self, in_start_date, in_end_date, mode=ALL):
         
-        def special(in_date):
+        def special(in_start_datei, in_end_date):
             returns_special = self.sum_loss_profits.get('returns').get('special',[])
             total_sum = 0
             element_sum = 0
@@ -137,18 +134,17 @@ class Economy(object):
             if len(returns_special):
                 for element in returns_special:
 
-                    if in_date < element.get('date'):
+                    if in_start_date < element.get('date'):
                         break
 
-                    if in_date >= element.get('date'):
+                    if  in_start_date <= element.get('date') and element.get('date') < in_end_date:
                         element_sum = element.get('value', 0)
                         total_sum = total_sum + element_sum
                         includes_objects.append((element, element_sum))
 
-
             return (total_sum, includes_objects)
 
-        def regular(in_date):
+        def regular(in_start_date, in_end_date):
             costs_regular = self.sum_loss_profits.get('returns').get('regular',[])
             total_sum = 0
             element_sum = 0
@@ -159,33 +155,28 @@ class Economy(object):
 
                     value_per_day = element.get('value', 0)/ float(element.get('period'))
 
-                    if element.get('start_date') < in_date <= element.get('end_date'):
-                        element_sum =  ((in_date - element.get('start_date')).days) * value_per_day
+                    if element.get('start_date') < in_start_date <= element.get('end_date'):
+                        element_sum =  ((in_start_date - element.get('start_date')).days) * value_per_day
                         total_sum = total_sum + element_sum
                         includes_objects.append((element, total_sum))
             
             return (total_sum, includes_objects)
 
-        if mode == ALL:
-            return (special(in_date), regular(in_date))
-        elif mode == REGULAR:
-            return (None, regular(in_date))
+        if mode == REGULAR:
+            return (None, regular(in_start_date, in_end_date))
         elif mode == SPECIAL:
-            return (special(in_date), None)
+            return (special(in_start_date, in_end_date), None)
 
-    def get_returns(self, in_date, mode=ALL):
-        return self.__count_sum_loss_profits_return(in_date, mode)
+    def get_returns(self, in_start_date, in_end_date, mode=ALL):
+        return self.__count_sum_loss_profits_return(in_start_date, in_end_date, mode)
        
 class CollectionEconomy(object):
-
-    #Granularity
-    DAY, MONTH, YEAR = range(0, 3)
 
     def __init__(self, in_econ_object=[]):
 
         self.__economy_elements = in_econ_object
 
-    def get_elements(self, ele_type=None, ele_category=None, ele_global_event=False):
+    def get_elements(self, ele_type=None, ele_category=None):
 
         return_elements = []
 
@@ -206,76 +197,117 @@ class CollectionEconomy(object):
             target.close()
 
         @coroutine
-        def filter_ele_global_type(ele_global_event):
+        def filter_():
 
             while True:
                 in_element = (yield)
-                if (ele_global_event is None) or (in_element.global_event == ele_global_event):
-                    return_elements.append(in_element)
+                return_elements.append(in_element)
         
-        filter_ele_type(filter_ele_category(filter_ele_global_type(ele_global_event), ele_category), ele_type)
+        filter_ele_type(filter_ele_category(filter_(), ele_category), ele_type)
         return return_elements 
     
-    def get_collection(self,ele_type=None, ele_category=None, ele_global_event=False):
-        return CollectionEconomy(self.get_elements(ele_type, ele_category, ele_global_event))
+    def get_collection(self,ele_type=None, ele_category=None):
+        return CollectionEconomy(self.get_elements(ele_type, ele_category))
 
-    def returns(self, in_start_date, in_end_date, mode=ALL):
-        returns_objects = []
-        special_objects = []
-        empty_objects = []
+    def returns(self, in_start_date, in_end_date, mode=ALL, granulation='YEARLY'):
 
-        total_sum = 0
-        regular_sum = 0
-        special_sum = 0
+        def special(in_start_date, in_end_date, mode):
 
-        tmp_eco_element = None
+            total_sum = 0
+            special_sum = 0
 
-        for date in (dateutil.rrule.rrule(dateutil.rrule.MONTHLY,
-                     dtstart=dateutil.parser.parse(in_start_date),
-                     until=dateutil.parser.parse(in_end_date))):
+            tmp_eco_element = None
+
+            start_date = in_start_date
+            end_date = in_end_date
+
+            tmp_date = None
+            tmp_data_element = None
+ 
+            input_objects_dict = {}
 
             for eco_element in self.__economy_elements:
-                tmp_eco_element = eco_element.get_returns(date, mode)
+                tmp_eco_element = eco_element.get_returns(start_date, end_date, mode)
                 special_eco_element, regular_eco_element = tmp_eco_element
 
                 if special_eco_element:
-                    if not special_eco_element[1] not in special_objects:
-                        total_sum = total_sum + special_eco_element[0]
-                        special_sum = special_sum + special_eco_element[0]
-                        special_objects.append(special_eco_element[1])
-                        returns_objects.append(tmp_eco_element)
 
-                    elif not date in empty_objects:
-                        empty_objects.append(date)
-                        returns_objects.append({date:(0,[])})
-                
-                if regular_eco_element:
-                    total_sum = total_sum + regular_eco_element[0]
-                    regular_sum = regular_sum + regular_eco_element[0]
-                    returns_objects.append(tmp_eco_element)
+                    total_sum = total_sum + special_eco_element[0]
+
+                    for objs in special_eco_element[1]:
+                        
+                        tmp_date = objs[0].get('date', None)
+                        if not tmp_date in input_objects_dict:
+                            input_objects_dict[tmp_date]= [[objs[0]], objs[1]]
+                        else:
+                            tmp_data_element =  input_objects_dict.get(tmp_date)
+                            tmp_data_element[1] = tmp_data_element[1] + objs[1]
+                            tmp_data_element[0].append(objs[0])
+
+            return (total_sum, input_objects_dict)
 
 
+        def regular(in_start_date, in_end_date, mode):
 
-        assert round(total_sum, 3) == (round(regular_sum, 3) + round(special_sum, 3)), "Total sum does not equal the subsums"
-        return (total_sum, special_sum, regular_sum, returns_objects)
+            total_sum = 0
+            input_objects_dict = {}
 
-    def costs(self, in_start_date, in_end_date, mode=ALL):
+            temp_for_date_list_of_data = 0
+            tmp_data = None
+
+            start_date = in_start_date
+            end_date = in_end_date
+
+
+            for date in (dateutil.rrule.rrule(getattr(dateutil.rrule, granulation),
+                         dtstart=start_date,
+                         until=end_date)):
+
+                for eco_element in self.__economy_elements:
+                    tmp_eco_element = eco_element.get_returns(date, None, mode)
+                    special_eco_element, regular_eco_element = tmp_eco_element
+                    
+
+                    if regular_eco_element:
+                        total_sum = total_sum + regular_eco_element[0]
+                        temp_for_date_list_of_data = regular_eco_element[1]
+                        for element in temp_for_date_list_of_data:
+                            data, cost = element
+
+                            if date in input_objects_dict:
+                                tmp_data = input_objects_dict.get(date)
+                                tmp_data[1] = tmp_data[1] + cost
+                                tmp_data[0].append(data)
+
+                            else:
+                                input_objects_dict[date] = [[data], cost]
+
+            return(total_sum, input_objects_dict)    
+
+
+        if mode == REGULAR:
+            return (regular(in_start_date, in_end_date, mode), None)
+        elif mode == SPECIAL:
+            return (None, special(in_start_date, in_end_date, mode))
+        elif mode == ALL:
+            return (regular(in_start_date, in_end_date, mode=REGULAR), special(in_start_date, in_end_date, mode=SPECIAL))
+
+    def costs(self, in_start_date, in_end_date, mode=ALL, granulation='YEARLY'):
         
 
         def special(in_start_date, in_end_date, mode):
 
             total_sum = 0
             special_sum = 0
-            regular_sum = 0
 
             tmp_eco_element = None
 
-            start_date = dateutil.parser.parse(in_start_date)
-            end_date = dateutil.parser.parse(in_end_date)
+            start_date = in_start_date
+            end_date = in_end_date
 
             tmp_date = None
             tmp_data_element = None
-    
+ 
             input_objects_dict = {}
 
             for eco_element in self.__economy_elements:
@@ -296,28 +328,22 @@ class CollectionEconomy(object):
                             tmp_data_element[1] = tmp_data_element[1] + objs[1]
                             tmp_data_element[0].append(objs[0])
 
-            print(total_sum, special_sum, input_objects_dict)
-            return (total_sum, special_sum, regular_sum, input_objects_dict)
+            return (total_sum, input_objects_dict)
 
-        #return special(in_start_date, in_end_date, mode)
 
         def regular(in_start_date, in_end_date, mode):
 
-            special_eco_element = None
-            regular_sum = 0
             total_sum = 0
-            costs_objects = []
             input_objects_dict = {}
 
-            temp_for_date_total_cost = 0
             temp_for_date_list_of_data = 0
             tmp_data = None
 
-            start_date = dateutil.parser.parse(in_start_date)
-            end_date = dateutil.parser.parse(in_end_date)
+            start_date = (in_start_date)
+            end_date = (in_end_date)
 
 
-            for date in (dateutil.rrule.rrule(dateutil.rrule.MONTHLY,
+            for date in (dateutil.rrule.rrule(getattr(dateutil.rrule, granulation),
                          dtstart=start_date,
                          until=end_date)):
 
@@ -325,7 +351,6 @@ class CollectionEconomy(object):
                     tmp_eco_element = eco_element.get_costs(date, None, mode)
                     special_eco_element, regular_eco_element = tmp_eco_element
                     
-
                     if regular_eco_element:
                         total_sum = total_sum + regular_eco_element[0]
                         temp_for_date_list_of_data = regular_eco_element[1]
@@ -340,23 +365,55 @@ class CollectionEconomy(object):
                             else:
                                 input_objects_dict[date] = [[data], cost]
 
+            return(total_sum, input_objects_dict)    
 
 
-                          #  objs, cost
-                            #print(regular_eco_element)
-                        #tmp_data_element = ip
-                    #    regular_sum = regular_sum + regular_eco_element[0]
-                    #    total_sum = total_sum + regular_eco_element[0]            
-                    #    costs_objects.append({date:tmp_eco_element})
+        if mode == REGULAR:
+            return (regular(in_start_date, in_end_date, mode), None)
+        elif mode == SPECIAL:
+            return (None, special(in_start_date, in_end_date, mode))
+        elif mode == ALL:
+            return ((regular(in_start_date, in_end_date, mode=REGULAR)), (special(in_start_date, in_end_date, mode=SPECIAL)))
 
-                    #costs_objects.append({date:copy.deepcopy(input_objects)})
-                    #input_objects.clear()
-            print(input_objects_dict)
-            return(total_sum, regular_sum, costs_objects)    
-        print("pokemon")
-        return regular(in_start_date, in_end_date, mode)
-       #print(total_sum, regular_sum, special_sum)
-       #assert round(total_sum, 3) == (round(regular_sum, 3) + round(special_sum, 3)), "Total sum does not equal the subsums"
+
+    def amortization(self, in_start_date, in_end_date, granulation='YEARLY'):
+
+        total_sum = 0
+        
+        tmp_amortization_data = None
+        tmp_amortization_rate = None
+
+        start_date = (in_start_date)
+        end_date = (in_end_date)
+
+        input_objects_dict = {}
+
+        cost = 0
+        data = 0
+
+        for date in (dateutil.rrule.rrule(getattr(dateutil.rrule, granulation),
+                     dtstart=start_date,
+                     until=end_date)):
+
+            for eco_element in self.__economy_elements:
+                
+                tmp_amortization_data = eco_element.count_amortization_rate(date)
+                if tmp_amortization_data is None:
+                    continue
+
+                cost, data = tmp_amortization_data
+
+                total_sum = total_sum + cost
+
+                if date in input_objects_dict:
+                    tmp_amortization_rate = input_objects_dict.get(date)
+                    tmp_amortization_rate[0].extend(data)
+                    tmp_amortization_rate[1] += cost 
+                    
+                else:
+                    input_objects_dict[date] = [data, cost]
+        return (total_sum, input_objects_dict)
+
 
     @property
     def elements(self, in_elements):
@@ -364,5 +421,8 @@ class CollectionEconomy(object):
         self.__economy_elements = copy.deepcopy(in_elements)
 
         return
+    @elements.getter
+    def elements(self):
+        return self.__economy_elements
        
 
