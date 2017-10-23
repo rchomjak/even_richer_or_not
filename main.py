@@ -1,11 +1,18 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.6
+
+import sys
+
+DEPENDENCIES="DEPENDENCIES modules/packages: Matplotlib, dateutil, jsonschema"
+
+if sys.hexversion < 50725104:
+    print("You MUST use python 3.6+ ", file=sys.stderr)
+    exit(1)
 
 try:
     import argparse
     import base64
     import collections
     import io
-    import sys
 
     import jsonoperation
     import matplotlib.pylab as plt
@@ -13,9 +20,8 @@ try:
 
 except (ImportError, ModuleNotFoundError) as e:
     print(e, file=sys.stderr)
-    dependencies = "Dependencies: Matplotlib + pylab, dateutil"
-    print(dependencies, file=sys.stderr)
-
+    print(DEPENDENCIES, file=sys.stderr)
+    exit(1)
 
 
 
@@ -49,6 +55,9 @@ examples_string = """
 
 NOTES:
     There is not any JSON schema, the program neihter check syntactically nor semantically data correctness.
+
+DEPENDENCIES:
+    matplotlib, dateutil, jsonschema 
 
 \n
 
@@ -155,7 +164,9 @@ if __name__ == '__main__':
 
     except (ImportError, ModuleNotFoundError) as e:
         print(e, file=sys.stderr)
-        dependencies = "Dependencies: Matplotlib + pylab, dateutil"
-        print(dependencies, file=sys.stderr)
+        print(DEPENDENCIES, file=sys.stderr)
+
+         
+
 
 
