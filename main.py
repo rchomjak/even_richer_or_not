@@ -21,8 +21,6 @@ try:
 except (ImportError, ModuleNotFoundError) as e:
     print(e, file=sys.stderr)
     print(DEPENDENCIES, file=sys.stderr)
-    exit(1)
-
 
 
 def check_date(input_string):
