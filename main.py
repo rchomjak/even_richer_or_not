@@ -15,6 +15,8 @@ try:
     import io
 
     import jsonoperation
+    import matplotlib as mpl
+    mpl.use('Agg')
     import matplotlib.pylab as plt
 
 
